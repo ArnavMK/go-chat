@@ -1,4 +1,4 @@
-package gochat
+package main 
 
 import (
 	"fmt"
@@ -14,11 +14,9 @@ func main() {
 		fmt.Println(err);
 		return;
 	}
-
 	defer listener.Close();
 
 	server := server.NewServer();
-
 	go server.BroadcastAllMessages();
 
 	for {
