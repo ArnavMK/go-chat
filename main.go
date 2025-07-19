@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"net"
 	"github.com/arnavmk/go-chat/server"
 )
@@ -21,14 +20,13 @@ func main() {
 
 	for {
 		connection, err := listener.Accept();
+
 		if err != nil {
-			if err == io.EOF {
-				fmt.Println("Client has disconnected");
-				return;
-			}
+			fmt.Println(err);
 			return;
 		}
 
+		server.AddClient(connection);
 		go server.HandleConnections(connection);
 	}
 }
