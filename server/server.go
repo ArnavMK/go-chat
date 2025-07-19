@@ -1,4 +1,4 @@
-package main
+package server 
 
 import (
 	"fmt"
@@ -13,8 +13,15 @@ type Server struct {
 	messageChannel chan string;
 }
 
+func NewServer() *Server {
+	return &Server {
+		messageChannel: make(chan string),
+		mutex: sync.Mutex{},
+		clients: make([]net.Conn, 0),	
+	}
+}
 
-func (s *Server) handleConnections(conn net.Conn) {
+func (s *Server) HandleConnections(conn net.Conn) {
 
     defer conn.Close();
     buf := make([]byte, 1024);
@@ -37,41 +44,10 @@ func (s *Server) handleConnections(conn net.Conn) {
     }
 }
 
-func (s *Server) broadcastAllMessages() {
+func (s *Server) BroadcastAllMessages() {
     
     for message := range s.messageChannel {
         fmt.Println("Someone said: ", message);
     }
 }
 
-func main() {
-
-	listener, err := net.Listen("tcp", ":8080");
-	if err != nil {
-		fmt.Println(err);
-		return;
-	}
-
-	defer listener.Close();
-
-	server := &Server {
-		clients: make([]net.Conn, 0),
-		mutex: sync.Mutex{},
-		messageChannel: make(chan string),
-	}
-
-	go server.broadcastAllMessages();
-
-	for {
-		connection, err := listener.Accept();
-		if err != nil {
-			if err == io.EOF {
-				fmt.Println("Client has disconnected");
-				return;
-			}
-			return;
-		}
-
-		go server.handleConnections(connection);
-	}
-}
