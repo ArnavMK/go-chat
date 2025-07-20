@@ -10,12 +10,12 @@ import (
 type Server struct {
 	clients []net.Conn;
 	mutex sync.Mutex;
-	messageChannel chan string;
+	messageChannel chan map[net.Conn]string;
 }
 
 func NewServer() *Server {
 	return &Server {
-		messageChannel: make(chan string),
+		messageChannel: make(chan map[net.Conn]string),
 		mutex: sync.Mutex{},
 		clients: make([]net.Conn, 0),	
 	}
@@ -40,7 +40,7 @@ func (s *Server) HandleConnections(conn net.Conn) {
 			return;
 		}
 
-		s.messageChannel <- string(buf[:n]);
+		s.messageChannel <- map[net.Conn]string{conn: string(buf[:n])};
 	}
 }
 
@@ -65,14 +65,17 @@ func (s *Server) RemoveConnection(connection net.Conn) {
 	s.mutex.Unlock();
 }
 
-func (s *Server) BroadcastAllMessages() {
+func (s *Server) RelayMessagesToClients() {
 
 	for message := range s.messageChannel {
-		fmt.Println("Someone said: ", message);
-
-		s.mutex.Lock();
-		fmt.Println("Connected clients: ", s.clients);
-		s.mutex.Unlock();
+		for sender, text := range message {
+			fmt.Printf("Sender: %v    Message: %v\n", sender.RemoteAddr(), text);
+			for _, client := range s.clients {
+				if sender != client {
+					client.Write([]byte(text));
+				}
+			}
+		}
 	}
 }
 
