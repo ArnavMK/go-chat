@@ -1,11 +1,9 @@
-package main 
+package main
 
 import (
 	"fmt"
 	"net"
-	"github.com/arnavmk/go-chat/server"
 )
-
 func main() {
 
 	listener, err := net.Listen("tcp", ":8080");
@@ -15,7 +13,7 @@ func main() {
 	}
 	defer listener.Close();
 
-	server := server.NewServer();
+	server := NewServer();
 	go server.BroadcastAllMessages();
 
 	for {
