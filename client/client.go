@@ -1,8 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"net"
+	"os"
+	"strings"
 )
 
 func main() {
@@ -15,11 +18,13 @@ func main() {
 
 	go handleIncomingMessages(conn);
 
+	reader := bufio.NewReader(os.Stdin);
 	for {
-		var input string;
-		fmt.Scan(&input);
+		input, _ := reader.ReadString('\n');
+		input = strings.TrimSpace(input);
 		conn.Write([]byte(input));
 	}
+
 }
 
 func handleIncomingMessages(conn net.Conn) {
