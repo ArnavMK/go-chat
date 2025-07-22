@@ -18,13 +18,11 @@ func main() {
 
 	for {
 		connection, err := listener.Accept();
-
 		if err != nil {
 			fmt.Println(err);
 			return;
 		}
-
-		server.AddClient(connection);
-		go server.HandleConnections(connection);
+	
+		go server.HandleConnections(connection, 0);
 	}
 }
