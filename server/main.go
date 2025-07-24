@@ -23,6 +23,6 @@ func main() {
 			return;
 		}
 	
-		go server.HandleConnections(connection, 0);
+		go server.HandleConnections(connection, false);
 	}
 }

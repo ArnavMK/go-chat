@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"strings"
 	"sync"
 )
 
@@ -26,7 +27,7 @@ func NewServer() *Server {
 	}
 }
 
-func (s *Server) HandleConnections(conn net.Conn, firstMessageCounter int) {
+func (s *Server) HandleConnections(conn net.Conn, hasRecievedUsername bool) {
 
 	defer conn.Close();
 	buf := make([]byte, 1024);
@@ -44,12 +45,17 @@ func (s *Server) HandleConnections(conn net.Conn, firstMessageCounter int) {
 			fmt.Println(err);
 			return;
 		}
-	
-		if firstMessageCounter < 1 {
-			s.AddClient(conn, string(buf[:n])); firstMessageCounter++;
+
+		message := string(buf[:n]);
+
+		if strings.Contains(message, "USERNAME:") && !hasRecievedUsername {
+			username := strings.Split(message, ":")[1];
+			s.AddClient(conn, username); hasRecievedUsername = true; 
+
 		} else {
 			client := s.GetClient(conn);
-			s.messageChannel <- map[Client]string{client: string(buf[:n])};
+			s.messageChannel <- map[Client]string{client: message};
+
 		}
 	}
 }

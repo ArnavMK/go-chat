@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"net"
 	"os"
 	"strings"
@@ -15,11 +16,14 @@ func setupCommunicationWithServer() {
 
 	conn, err := net.Dial("tcp", "localhost:8080");
 	if err != nil {
+		if err == io.EOF {
+			fmt.Print("Lost connection with the server: ");
+		}
 		fmt.Println(err);
 		return;
 	}
 	defer conn.Close();
-	conn.Write([]byte(username));
+	conn.Write([]byte("USERNAME:" + username));
 
 	go handleIncomingMessages(conn);
 
